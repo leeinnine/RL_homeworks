@@ -6,7 +6,7 @@ from cas4160.agents.pg_agent import PGAgent
 import os
 import time
 
-import gym
+import gymnasium as gym
 import numpy as np
 import torch
 from cas4160.infrastructure import pytorch_util as ptu
