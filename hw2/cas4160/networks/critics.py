@@ -46,6 +46,9 @@ class ValueCritic(nn.Module):
         assert q_values.ndim == 1
 
         # TODO: update the critic using the observations and q_values
+        dist = self.forward(obs)
+        
+
         loss = None
 
         return {
