@@ -97,7 +97,7 @@ class PGAgent(nn.Module):
         if not self.use_ppo:
             # TODO: normalize the advantages to have a mean of zero and a standard deviation of one within the batch
             if self.normalize_advantages:
-                advantages = (advantages - np.mean(advantages)) / np.std(advantages)
+                advantages = (advantages - np.mean(advantages)) / ( np.std(advantages) + 1e-8 )
 
             # TODO: update the PG actor/policy network once using the advantages
             info: dict = self.actor.update(obs, actions, advantages)
@@ -132,15 +132,29 @@ class PGAgent(nn.Module):
 
                     # TODO: normalize `advantages_slice`` to have a mean of zero and a standard deviation of one within the batch
                     if self.normalize_advantages:
-                        pass
+                        advantages_slice = (advantages_slice - np.mean(advantages_slice)) / ( np.std(advantages_slice) + 1e-8 )
 
                     # TODO: update the PG actor/policy with PPO objective
                     # HINT: call self.actor.ppo_update
-                    info: dict = None
+                    # The below commented block is used for Section 7.3.2 Answer
+                    # info: dict = self.actor.update(
+                    #     obs_slice,
+                    #     actions_slice,
+                    #     advantages_slice
+                    # )
+                    info: dict = self.actor.ppo_update(
+                        obs_slice,
+                        actions_slice,
+                        advantages_slice,
+                        logp_slice,
+                        self.ppo_cliprange,
+                    )
 
             assert self.critic is not None, "PPO requires a critic for calculating GAE."
             # TODO: update the critic for `baseline_gradient_steps` times
-            critic_info: dict = None
+            # critic_info: dict = None
+            for _ in range(self.baseline_gradient_steps):
+                critic_info = self.critic.update(obs, q_values)
 
             info.update(critic_info)
         return info
@@ -181,7 +195,8 @@ class PGAgent(nn.Module):
             advantages = q_values
         else:
             # TODO: run the critic and use it as a baseline
-            values = self.critic(obs)
+            obs_tensor = ptu.from_numpy(obs)
+            values = ptu.to_numpy(self.critic(obs_tensor))
 
             if self.gae_lambda is None:
                 # TODO: if using a baseline, but not GAE, what are the advantages?
@@ -266,11 +281,11 @@ class PGAgent(nn.Module):
         # TODO: calculate discounted reward to go using the above formula
         ret = np.zeros_like(rewards)
 
-        for i in range(len(rewards)):
-            # ret[i] = np.sum(rewards[i:len(rewards)])
-            ret[i] = self._discounted_return(rewards[i:len(rewards)])[0]
-        # ret = None
-
+        cumulative_sum = 0.0
+        for i in reversed(range(len(rewards))):
+            cumulative_sum = rewards[i] + self.gamma * cumulative_sum
+            ret[i] = cumulative_sum
+        
         assert rewards.shape == ret.shape
         return ret
 
@@ -287,8 +302,15 @@ class PGAgent(nn.Module):
         # TODO: calculate the log probabilities
         # HINT: self.actor outputs a distribution object, which has a method log_prob that takes in the actions
 
+        obs = ptu.from_numpy(obs)
+        actions = ptu.from_numpy(actions)
+
         dist = self.actor.forward(obs)
         logp = dist.log_prob(actions)
+
+        if len(logp.shape) > 1:
+            logp = logp.sum(-1)
+        logp = ptu.to_numpy(logp)
 
         assert logp.ndim == 1 and logp.shape[0] == obs.shape[0]
         return logp

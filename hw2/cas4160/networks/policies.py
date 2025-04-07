@@ -61,7 +61,7 @@ class MLPPolicy(nn.Module):
         dist = self.forward(observation)
         action = dist.sample()
         action = ptu.to_numpy(action)
-        action = action[0]
+        # action = action[0]
 
         return action
 

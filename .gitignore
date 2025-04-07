@@ -1,1 +1,12 @@
 .DS_Store
+hw2/cartpole_large_batch.png
+hw2/cartpole_small_batch.png
+hw2/cheetah_1_baseline_loss.png
+hw2/cheetah_2_learning_curves.png
+hw2/cheetah_3_learning_curves.png
+hw2/cheetah_4_learning_curves.png
+hw2/cheetah_5_learning_curves.png
+hw2/humanoid_1_learning_curves.png
+hw2/hw2_2019126018.pdf
+hw2/reacher_1_learning_curves.png
+hw2/reacher_2_learning_curves.png
