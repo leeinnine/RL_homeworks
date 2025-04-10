@@ -43,7 +43,7 @@ def sample_trajectory(
         next_ob, rew, terminated, truncated, info = env.step(ac)
 
         # TODO(student): rollout can end due to termination, or truncation because it reached the maximum number of steps.
-        rollout_done = terminated or truncated or steps>=max_length # HINT: this is either 0 or 1
+        rollout_done = (terminated or truncated) or steps >= max_length # HINT: this is either 0 or 1
 
         steps += 1
 

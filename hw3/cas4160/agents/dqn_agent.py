@@ -74,21 +74,21 @@ class DQNAgent(nn.Module):
         # Compute target values
         with torch.no_grad():
             # TODO(student): compute target values
-            next_qa_values = self.target_critic(obs)    
+            next_qa_values = self.target_critic(next_obs)    
 
             if self.use_double_q:
                 # Choose action with argmax of critic network 
-                next_action = torch.argmax(self.critic(next_obs))
+                next_action = torch.argmax(self.critic(next_obs), dim=-1, keepdim=True)
             else:
                 # Choose action with argmax of target critic network 
-                next_action = torch.argmax(next_qa_values)
-            next_q_values = torch.gather(next_qa_values, 1, next_action.unsqueeze(-1)) # see torch.gather
-            target_values = reward + self.discount * (1 - done) * next_q_values
+                next_action = torch.argmax(next_qa_values, dim=-1, keepdim=True)
+            next_q_values = torch.gather(next_qa_values, 1, next_action) # see torch.gather
+            target_values = reward.unsqueeze(1) + self.discount * (1 - done.unsqueeze(1).float()) * next_q_values
 
         # TODO(student): train the critic with the target values
         # Use self.critic_loss for calculating the loss
         qa_values = self.critic(obs)
-        q_values = qa_values.gather(qa_values, 1, action.unsqueeze(-1)) # Compute from the data actions; see torch.gather
+        q_values = torch.gather(qa_values, 1, action.unsqueeze(1)) # Compute from the data actions; see torch.gather
         loss = self.critic_loss(q_values, target_values)
 
         self.critic_optimizer.zero_grad()
