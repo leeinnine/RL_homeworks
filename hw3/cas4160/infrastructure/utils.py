@@ -43,7 +43,7 @@ def sample_trajectory(
         next_ob, rew, terminated, truncated, info = env.step(ac)
 
         # TODO(student): rollout can end due to termination, or truncation because it reached the maximum number of steps.
-        rollout_done = (terminated or truncated) or steps >= max_length # HINT: this is either 0 or 1
+        rollout_done = terminated or truncated # HINT: this is either 0 or 1
 
         steps += 1
 
@@ -89,7 +89,7 @@ def sample_trajectories(
     trajs = []
     while timesteps_this_batch < min_timesteps_per_batch:
         # collect rollout
-        traj = sample_trajectory(env, policy, max_length, render)
+        traj = sample_trajectory(env, agent, max_length, render)
         trajs.append(traj)
 
         # count steps

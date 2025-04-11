@@ -55,7 +55,6 @@ class DQNAgent(nn.Module):
         else:
             q_values = self.critic(observation)
             action = torch.argmax(q_values, dim=-1)
-            # action = torch.argmax(q_values, dim=-1, keepdim=True)
         # which format should I give... 0, [0], [[0]] ?? Answer: doesn't matter.
         # because it returns only the item().
         return ptu.to_numpy(action).squeeze(0).item()
@@ -69,21 +68,22 @@ class DQNAgent(nn.Module):
         done: torch.Tensor,
     ) -> dict:
         """Update the DQN critic, and return stats for logging."""
-        (batch_size,) = reward.shape
+        (batch_size,) = reward.shape    # [32] (1-D)
 
         # Compute target values
         with torch.no_grad():
             # TODO(student): compute target values
-            next_qa_values = self.target_critic(next_obs)    
+            next_qa_values = self.target_critic(next_obs)   # [32,18] 아마 (batch_size, corrresponding action)
+            # obs, next_obs size: [32,4,84,84]
 
             if self.use_double_q:
                 # Choose action with argmax of critic network 
-                next_action = torch.argmax(self.critic(next_obs), dim=-1, keepdim=True)
+                next_action = torch.argmax(self.critic(next_obs), dim=-1) # returns indices, [32,1] (2-D)
             else:
                 # Choose action with argmax of target critic network 
-                next_action = torch.argmax(next_qa_values, dim=-1, keepdim=True)
-            next_q_values = torch.gather(next_qa_values, 1, next_action) # see torch.gather
-            target_values = reward.unsqueeze(1) + self.discount * (1 - done.unsqueeze(1).float()) * next_q_values
+                next_action = torch.argmax(next_qa_values, dim=-1)    # returns indices, [32,1] (2-D)
+            next_q_values = torch.gather(next_qa_values, 1, next_action.unsqueeze(1)) # returns value of those indices, 
+            target_values = reward.unsqueeze(1) + self.discount * (1 - done.int().unsqueeze(1)) * next_q_values
 
         # TODO(student): train the critic with the target values
         # Use self.critic_loss for calculating the loss

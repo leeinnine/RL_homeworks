@@ -1,0 +1,38 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+
+
+        {
+            "name": "Python Debugger: Current File with Arguments",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": "${command:pickArgs}"
+        },
+        {
+            "name": "debug: dqn",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "/root/RL_homeworks/hw3",
+            "program": "cas4160/scripts/run_hw3.py",
+            "console": "integratedTerminal",
+            "python": "/usr/local/bin/anaconda3/envs/cas4160/bin/python3",
+            "args": "-cfg experiments/dqn/bankheist.yaml --seed 1"
+        },
+        {
+            "name": "debug: ddqn",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "/root/RL_homeworks/hw3",
+            "program": "cas4160/scripts/run_hw3.py",
+            "console": "integratedTerminal",
+            "python": "/usr/local/bin/anaconda3/envs/cas4160/bin/python3",
+            "args": "-cfg experiments/dqn/bankheist.yaml --seed 1"
+        }
+    ]
+}
