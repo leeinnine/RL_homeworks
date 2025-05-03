@@ -176,8 +176,12 @@ cython_debug/
 data/
 
 .DS_Store
+._.DS_Store
+**/.DS_Store
+**/._.DS_Store
 __pycache__
 cas4160.egg-info
 *.png
 *.pdf
 *.zip
+hw4/plot_create.sh
